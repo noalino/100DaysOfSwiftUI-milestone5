@@ -5,10 +5,7 @@
 //  Created by Noalino on 23/02/2024.
 //
 
-import CoreImage
-import CoreImage.CIFilterBuiltins
 import PhotosUI
-import StoreKit
 import SwiftUI
 
 struct ImageWithName: Identifiable {
@@ -20,6 +17,8 @@ struct ImageWithName: Identifiable {
 struct ContentView: View {
     @State private var items: [ImageWithName] = []
     @State private var selectedItem: PhotosPickerItem?
+    @State private var selectedItemName: String = ""
+    @State private var showDialog = false
 
     @ViewBuilder
     var ListView: some View {
@@ -27,7 +26,7 @@ struct ContentView: View {
             ContentUnavailableView("No names", systemImage: "photo.badge.plus", description: Text("Tap \"Add a name\" to import a name"))
         } else {
             List(items) { item in
-                HStack {
+                HStack(spacing: 6) {
                     item.image
                         .resizable()
                         .frame(width: 50, height: 50)
@@ -44,19 +43,38 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ListView
-            .toolbar {
-                PhotosPicker("Add a name", selection: $selectedItem)
-                    .onChange(of: selectedItem, addImage)
-            }
-            .navigationTitle("RememberNames")
+                .toolbar {
+                    PhotosPicker("Add a name", selection: $selectedItem)
+                        .onChange(of: selectedItem) {
+                            guard let selectedItem else { return }
+                            // Delay to make sure picker is dismissed
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                showDialog = true
+                            }
+                        }
+                }
+                .navigationTitle("RememberNames")
+                .alert("Enter a name", isPresented: $showDialog) {
+                    TextField("Enter a name", text: $selectedItemName)
+                    Button("Save") { saveItem() }
+                    Button("Cancel", role: .cancel) { }
+                }
         }
     }
 
-    func addImage() {
+    func saveItem() {
         Task {
             guard let image = try await selectedItem?.loadTransferable(type: Image.self) else { return }
-            items.append(ImageWithName(name: "test", image: image))
+
+            items.append(ImageWithName(name: selectedItemName, image: image))
+
+            cleanSelection()
         }
+    }
+
+    func cleanSelection() {
+        selectedItem = nil
+        selectedItemName = ""
     }
 }
 
