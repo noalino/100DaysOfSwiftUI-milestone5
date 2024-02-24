@@ -8,16 +8,16 @@
 import PhotosUI
 import SwiftUI
 
-struct ImageWithName: Identifiable {
+struct Person: Identifiable {
     let id = UUID()
     let name: String
     let image: Image
 }
 
 struct ContentView: View {
-    @State private var items: [ImageWithName] = []
-    @State private var selectedItem: PhotosPickerItem?
-    @State private var selectedItemName: String = ""
+    @State private var items: [Person] = []
+    @State private var selectedImage: PhotosPickerItem?
+    @State private var name: String = ""
     @State private var showDialog = false
 
     @ViewBuilder
@@ -44,9 +44,9 @@ struct ContentView: View {
         NavigationStack {
             ListView
                 .toolbar {
-                    PhotosPicker("Add a name", selection: $selectedItem)
-                        .onChange(of: selectedItem) {
-                            guard let selectedItem else { return }
+                    PhotosPicker("Add a name", selection: $selectedImage)
+                        .onChange(of: selectedImage) {
+                            guard let selectedImage else { return }
                             // Delay to make sure picker is dismissed
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 showDialog = true
@@ -55,7 +55,7 @@ struct ContentView: View {
                 }
                 .navigationTitle("RememberNames")
                 .alert("Enter a name", isPresented: $showDialog) {
-                    TextField("Enter a name", text: $selectedItemName)
+                    TextField("Enter a name", text: $name)
                     Button("Save") { saveItem() }
                     Button("Cancel", role: .cancel) { }
                 }
@@ -64,17 +64,17 @@ struct ContentView: View {
 
     func saveItem() {
         Task {
-            guard let image = try await selectedItem?.loadTransferable(type: Image.self) else { return }
+            guard let image = try await selectedImage?.loadTransferable(type: Image.self) else { return }
 
-            items.append(ImageWithName(name: selectedItemName, image: image))
+            items.append(Person(name: name, image: image))
 
             cleanSelection()
         }
     }
 
     func cleanSelection() {
-        selectedItem = nil
-        selectedItemName = ""
+        selectedImage = nil
+        name = ""
     }
 }
 
