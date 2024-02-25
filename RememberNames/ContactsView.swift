@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContactsView: View {
     @Environment(\.modelContext) var modelContext
-    @Query var contacts: [Contact]
+    @Query(sort: [SortDescriptor(\Contact.name)]) var contacts: [Contact]
 
     var body: some View {
         if contacts.isEmpty {
