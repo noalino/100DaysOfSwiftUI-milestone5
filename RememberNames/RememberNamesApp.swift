@@ -13,5 +13,6 @@ struct RememberNamesApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: Contact.self)
     }
 }

@@ -6,47 +6,23 @@
 //
 
 import PhotosUI
+import SwiftData
 import SwiftUI
 
-struct Person: Identifiable {
-    let id = UUID()
-    let name: String
-    let image: Image
-}
-
 struct ContentView: View {
-    @State private var items: [Person] = []
+    @Environment(\.modelContext) var modelContext
+
     @State private var selectedImage: PhotosPickerItem?
     @State private var name: String = ""
     @State private var showDialog = false
 
-    @ViewBuilder
-    var ListView: some View {
-        if items.isEmpty {
-            ContentUnavailableView("No names", systemImage: "photo.badge.plus", description: Text("Tap \"Add a name\" to import a name"))
-        } else {
-            List(items) { item in
-                HStack(spacing: 6) {
-                    item.image
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .clipShape(.circle)
-
-                    Spacer()
-
-                    Text(item.name)
-                }
-            }
-        }
-    }
-
     var body: some View {
         NavigationStack {
-            ListView
+            ContactsView()
                 .toolbar {
                     PhotosPicker("Add a name", selection: $selectedImage)
                         .onChange(of: selectedImage) {
-                            guard let selectedImage else { return }
+                            guard selectedImage != nil else { return }
                             // Delay to make sure picker is dismissed
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 showDialog = true
@@ -64,9 +40,9 @@ struct ContentView: View {
 
     func saveItem() {
         Task {
-            guard let image = try await selectedImage?.loadTransferable(type: Image.self) else { return }
+            guard let imageData = try await selectedImage?.loadTransferable(type: Data.self) else { return }
 
-            items.append(Person(name: name, image: image))
+            modelContext.insert(Contact(name: name, photo: imageData))
 
             cleanSelection()
         }
