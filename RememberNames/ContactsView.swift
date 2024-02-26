@@ -17,15 +17,19 @@ struct ContactsView: View {
             ContentUnavailableView("No names", systemImage: "photo.badge.plus", description: Text("Tap \"Add a name\" to import a name"))
         } else {
             List(contacts) { contact in
-                HStack {
-                    contact.image?
-                        .resizable()
-                        .frame(width: 50, height: 50)
-                        .clipShape(.circle)
+                NavigationLink {
+                    ContactDetailsView(title: contact.name, image: contact.image)
+                } label: {
+                    HStack {
+                        contact.image?
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .clipShape(.circle)
 
-                    Spacer()
+                        Spacer()
 
-                    Text(contact.name)
+                        Text(contact.name)
+                    }
                 }
             }
         }
