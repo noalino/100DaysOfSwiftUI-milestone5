@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var name: String = ""
     @State private var showDialog = false
 
+    let locationFetcher = LocationFetcher()
+
     var body: some View {
         NavigationStack {
             ContactsView()
@@ -23,6 +25,7 @@ struct ContentView: View {
                     PhotosPicker("Add a name", selection: $selectedImage)
                         .onChange(of: selectedImage) {
                             guard selectedImage != nil else { return }
+                            locationFetcher.start()
                             // Delay to make sure picker is dismissed
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 showDialog = true
@@ -41,6 +44,12 @@ struct ContentView: View {
     func saveItem() {
         Task {
             guard let imageData = try await selectedImage?.loadTransferable(type: Data.self) else { return }
+
+            if let location = locationFetcher.lastKnownLocation {
+                print("Your location is \(location)")
+            } else {
+                print("Your location is unknown")
+            }
 
             modelContext.insert(Contact(name: name, photo: imageData))
 
