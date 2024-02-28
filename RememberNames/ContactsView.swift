@@ -5,6 +5,7 @@
 //  Created by Noalino on 25/02/2024.
 //
 
+import MapKit
 import SwiftData
 import SwiftUI
 
@@ -18,7 +19,7 @@ struct ContactsView: View {
         } else {
             List(contacts) { contact in
                 NavigationLink {
-                    ContactDetailsView(title: contact.name, image: contact.image)
+                    ContactDetailsView(title: contact.name, image: contact.image, coordinate: CLLocationCoordinate2D(latitude: contact.latitude, longitude: contact.longitude))
                 } label: {
                     HStack {
                         contact.image?

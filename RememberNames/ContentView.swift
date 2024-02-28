@@ -45,13 +45,12 @@ struct ContentView: View {
         Task {
             guard let imageData = try await selectedImage?.loadTransferable(type: Data.self) else { return }
 
-            if let location = locationFetcher.lastKnownLocation {
-                print("Your location is \(location)")
-            } else {
-                print("Your location is unknown")
+            guard let location = locationFetcher.lastKnownLocation else {
+                print("Unknown location")
+                return
             }
 
-            modelContext.insert(Contact(name: name, photo: imageData))
+            modelContext.insert(Contact(name: name, photo: imageData, latitude: location.latitude, longitude: location.longitude))
 
             cleanSelection()
         }
